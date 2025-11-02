@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Text - AI Processing</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal active">
+        <div class="modal-content auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Đăng nhập</button>
+                <button class="auth-tab" data-tab="register">Đăng ký</button>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Chào mừng trở lại!</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="Nhập email của bạn" required>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" required>
+                </div>
+                <button class="btn btn-primary" onclick="handleLogin()">Đăng nhập</button>
+                <p class="auth-message">Chưa có tài khoản? <a href="#" onclick="switchTab('register')">Đăng ký ngay</a></p>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <h2>Tạo tài khoản mới</h2>
+                <div class="form-group">
+                    <label>Tên người dùng</label>
+                    <input type="text" id="registerName" placeholder="Nhập tên của bạn" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="Nhập email của bạn" required>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="registerPassword" placeholder="Nhập mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <label>Xác nhận mật khẩu</label>
+                    <input type="password" id="registerConfirmPassword" placeholder="Nhập lại mật khẩu" required>
+                </div>
+                <button class="btn btn-primary" onclick="handleRegister()">Đăng ký</button>
+                <p class="auth-message">Đã có tài khoản? <a href="#" onclick="switchTab('login')">Đăng nhập</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-image"></i>
+                    <h1>Image to Text AI</h1>
+                </div>
+                <div class="header-actions">
+                    <span class="user-name" id="userName">User</span>
+                    <button class="btn btn-secondary" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Container -->
+        <div class="app-container">
+            <!-- Sidebar - History -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-history"></i> Lịch sử công việc</h3>
+                    <button class="btn-icon" onclick="createNewWork()" title="Tạo công việc mới">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be dynamically added here -->
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Mode Selection -->
+                <div class="mode-selection">
+                    <h2>Chọn chế độ xử lý</h2>
+                    <div class="mode-buttons">
+                        <button class="mode-btn active" onclick="selectMode('single')" data-mode="single">
+                            <i class="fas fa-file-image"></i>
+                            <span>Xử lý nhanh</span>
+                            <small>1 hình ảnh</small>
+                        </button>
+                        <button class="mode-btn" onclick="selectMode('multiple')" data-mode="multiple">
+                            <i class="fas fa-images"></i>
+                            <span>Xử lý nhiều</span>
+                            <small>Tối đa 5 hình ảnh</small>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                        <div class="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Kéo thả hình ảnh vào đây hoặc</p>
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                Chọn hình ảnh
+                            </button>
+                            <small class="upload-info" id="uploadInfo">Tối đa 1 hình ảnh</small>
+                        </div>
+                        <div class="preview-container" id="previewContainer"></div>
+                    </div>
+                    <button class="btn btn-success btn-process" id="processBtn" onclick="processImages()" disabled>
+                        <i class="fas fa-magic"></i> Xử lý hình ảnh
+                    </button>
+                </div>
+
+                <!-- Text Output Section -->
+                <div class="text-output-section" id="textOutputSection">
+                    <h3>Kết quả văn bản</h3>
+                    <div class="text-boxes-container" id="textBoxesContainer">
+                        <!-- Text boxes will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Text Processing Tools -->
+                <div class="processing-tools" id="processingTools" style="display: none;">
+                    <h3>Công cụ xử lý văn bản</h3>
+                    <div class="selected-text-display">
+                        <p><strong>Văn bản đã chọn:</strong></p>
+                        <div class="selected-text" id="selectedTextDisplay">Vui lòng chọn văn bản để xử lý...</div>
+                    </div>
+                    <div class="tools-buttons">
+                        <button class="tool-btn" onclick="textToSpeech()">
+                            <i class="fas fa-volume-up"></i>
+                            Chuyển thành âm thanh
+                        </button>
+                        <button class="tool-btn" onclick="translateText()">
+                            <i class="fas fa-language"></i>
+                            Dịch văn bản
+                        </button>
+                        <button class="tool-btn" onclick="researchText()">
+                            <i class="fas fa-search"></i>
+                            Nghiên cứu
+                        </button>
+                    </div>
+                    <div class="tool-result" id="toolResult"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
