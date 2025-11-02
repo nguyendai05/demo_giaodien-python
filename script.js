@@ -574,8 +574,215 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = `toast ${type} show`;
-    
+
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
 }
+
+// Guide Modal Functions
+function openGuideModal() {
+    const guideModal = document.getElementById('guideModal');
+    guideModal.classList.add('active');
+}
+
+function closeGuideModal() {
+    const guideModal = document.getElementById('guideModal');
+    guideModal.classList.remove('active');
+}
+
+// Interactive Tour Functions
+let tourSteps = [
+    {
+        element: '.mode-selection',
+        title: 'Bước 1: Chọn chế độ xử lý',
+        text: 'Chọn "Xử lý nhanh" cho 1 ảnh hoặc "Xử lý nhiều" cho tối đa 5 ảnh cùng lúc.',
+        position: 'bottom'
+    },
+    {
+        element: '.upload-area',
+        title: 'Bước 2: Tải lên hình ảnh',
+        text: 'Kéo thả hình ảnh vào đây hoặc click "Chọn hình ảnh" để browse file từ máy tính của bạn.',
+        position: 'bottom'
+    },
+    {
+        element: '#processBtn',
+        title: 'Bước 3: Xử lý hình ảnh',
+        text: 'Sau khi tải ảnh lên, click nút này để AI phân tích và trích xuất văn bản từ hình ảnh.',
+        position: 'top'
+    },
+    {
+        element: '.text-output-section',
+        title: 'Bước 4: Xem kết quả',
+        text: 'Văn bản được trích xuất sẽ hiển thị ở đây. Bạn có thể chỉnh sửa, sao chép hoặc tải xuống.',
+        position: 'top'
+    },
+    {
+        element: '.sidebar',
+        title: 'Bước 5: Quản lý lịch sử',
+        text: 'Tất cả công việc của bạn được lưu tại đây. Click vào để xem lại hoặc tạo công việc mới.',
+        position: 'right'
+    }
+];
+
+let currentTourStep = 0;
+let tourActive = false;
+
+function startInteractiveTour() {
+    closeGuideModal();
+    currentTourStep = 0;
+    tourActive = true;
+    showTourStep(currentTourStep);
+
+    // Show overlay
+    document.getElementById('tourOverlay').style.display = 'block';
+
+    // Mark that user has seen the tour
+    localStorage.setItem('tourCompleted', 'true');
+}
+
+function showTourStep(stepIndex) {
+    if (stepIndex < 0 || stepIndex >= tourSteps.length) return;
+
+    const step = tourSteps[stepIndex];
+    const element = document.querySelector(step.element);
+
+    if (!element) {
+        console.warn(`Element not found for tour step: ${step.element}`);
+        return;
+    }
+
+    // Remove previous highlights
+    document.querySelectorAll('.tour-highlight').forEach(el => {
+        el.classList.remove('tour-highlight');
+    });
+
+    // Add highlight to current element
+    element.classList.add('tour-highlight');
+
+    // Scroll element into view
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Show tooltip
+    const tooltip = document.getElementById('tourTooltip');
+    const tooltipTitle = tooltip.querySelector('.tour-tooltip-title');
+    const tooltipText = tooltip.querySelector('.tour-tooltip-text');
+    const stepCounter = tooltip.querySelector('.tour-step-counter');
+
+    tooltipTitle.textContent = step.title;
+    tooltipText.textContent = step.text;
+    stepCounter.textContent = `Bước ${stepIndex + 1}/${tourSteps.length}`;
+
+    // Position tooltip
+    positionTooltip(element, tooltip, step.position);
+
+    // Show/hide navigation buttons
+    const prevBtn = document.getElementById('tourPrevBtn');
+    const nextBtn = document.getElementById('tourNextBtn');
+    const finishBtn = document.getElementById('tourFinishBtn');
+
+    prevBtn.style.display = stepIndex > 0 ? 'inline-flex' : 'none';
+    nextBtn.style.display = stepIndex < tourSteps.length - 1 ? 'inline-flex' : 'none';
+    finishBtn.style.display = stepIndex === tourSteps.length - 1 ? 'inline-flex' : 'none';
+
+    tooltip.style.display = 'block';
+}
+
+function positionTooltip(element, tooltip, position) {
+    const rect = element.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    let top, left;
+
+    switch(position) {
+        case 'top':
+            top = rect.top - tooltipRect.height - 20;
+            left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+            break;
+        case 'bottom':
+            top = rect.bottom + 20;
+            left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+            break;
+        case 'left':
+            top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+            left = rect.left - tooltipRect.width - 20;
+            break;
+        case 'right':
+            top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+            left = rect.right + 20;
+            break;
+        default:
+            top = rect.bottom + 20;
+            left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+    }
+
+    // Ensure tooltip stays within viewport
+    const margin = 10;
+    top = Math.max(margin, Math.min(top, window.innerHeight - tooltipRect.height - margin));
+    left = Math.max(margin, Math.min(left, window.innerWidth - tooltipRect.width - margin));
+
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+}
+
+function nextTourStep() {
+    if (currentTourStep < tourSteps.length - 1) {
+        currentTourStep++;
+        showTourStep(currentTourStep);
+    }
+}
+
+function previousTourStep() {
+    if (currentTourStep > 0) {
+        currentTourStep--;
+        showTourStep(currentTourStep);
+    }
+}
+
+function finishTour() {
+    closeTour();
+    showToast('Hoàn thành hướng dẫn! Chúc bạn sử dụng hiệu quả!', 'success');
+}
+
+function skipTour() {
+    if (confirm('Bạn có chắc muốn bỏ qua hướng dẫn?')) {
+        closeTour();
+    }
+}
+
+function closeTour() {
+    tourActive = false;
+    currentTourStep = 0;
+
+    // Hide overlay and tooltip
+    document.getElementById('tourOverlay').style.display = 'none';
+    document.getElementById('tourTooltip').style.display = 'none';
+
+    // Remove all highlights
+    document.querySelectorAll('.tour-highlight').forEach(el => {
+        el.classList.remove('tour-highlight');
+    });
+}
+
+// Auto-start tour for first-time users
+function checkFirstTimeUser() {
+    const tourCompleted = localStorage.getItem('tourCompleted');
+    const hasSeenTour = localStorage.getItem(`tourSeen_${currentUser.email}`);
+
+    if (!tourCompleted && !hasSeenTour) {
+        // Show tour after a short delay to let the UI settle
+        setTimeout(() => {
+            if (confirm('Bạn có muốn xem hướng dẫn sử dụng không?')) {
+                startInteractiveTour();
+            }
+            localStorage.setItem(`tourSeen_${currentUser.email}`, 'true');
+        }, 1000);
+    }
+}
+
+// Call checkFirstTimeUser when showing main app
+const originalShowMainApp = showMainApp;
+showMainApp = function() {
+    originalShowMainApp();
+    checkFirstTimeUser();
+};

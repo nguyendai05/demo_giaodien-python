@@ -66,6 +66,9 @@
                     <h1>Image to Text AI</h1>
                 </div>
                 <div class="header-actions">
+                    <button class="btn btn-help" onclick="openGuideModal()" title="Hướng dẫn sử dụng">
+                        <i class="fas fa-question-circle"></i> Hướng dẫn
+                    </button>
                     <span class="user-name" id="userName">User</span>
                     <button class="btn btn-secondary" onclick="handleLogout()">
                         <i class="fas fa-sign-out-alt"></i> Đăng xuất
@@ -164,6 +167,138 @@
 
     <!-- Notification Toast -->
     <div class="toast" id="toast"></div>
+
+    <!-- Guide Modal -->
+    <div id="guideModal" class="modal">
+        <div class="modal-content guide-modal">
+            <div class="guide-header">
+                <h2><i class="fas fa-book"></i> Hướng dẫn sử dụng</h2>
+                <button class="close-btn" onclick="closeGuideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="guide-content">
+                <div class="guide-section">
+                    <div class="guide-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3><i class="fas fa-toggle-on"></i> Chọn chế độ xử lý</h3>
+                            <p>Chọn giữa hai chế độ:</p>
+                            <ul>
+                                <li><strong>Xử lý nhanh:</strong> Xử lý 1 hình ảnh</li>
+                                <li><strong>Xử lý nhiều:</strong> Xử lý tối đa 5 hình ảnh cùng lúc</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3><i class="fas fa-upload"></i> Tải lên hình ảnh</h3>
+                            <p>Bạn có thể tải ảnh bằng 2 cách:</p>
+                            <ul>
+                                <li><strong>Kéo thả:</strong> Kéo file ảnh từ máy tính vào vùng upload</li>
+                                <li><strong>Chọn file:</strong> Click nút "Chọn hình ảnh" để browse file</li>
+                            </ul>
+                            <p class="note"><i class="fas fa-info-circle"></i> Hỗ trợ các định dạng: JPG, PNG, GIF, BMP</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3><i class="fas fa-magic"></i> Xử lý hình ảnh</h3>
+                            <p>Sau khi tải ảnh lên:</p>
+                            <ul>
+                                <li>Xem trước hình ảnh đã chọn</li>
+                                <li>Click nút <strong>"Xử lý hình ảnh"</strong></li>
+                                <li>Chờ AI phân tích và trích xuất văn bản</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3><i class="fas fa-file-alt"></i> Xem và chỉnh sửa kết quả</h3>
+                            <p>Sau khi xử lý xong:</p>
+                            <ul>
+                                <li>Văn bản được hiển thị trong ô kết quả</li>
+                                <li>Bạn có thể chỉnh sửa văn bản trực tiếp</li>
+                                <li>Chọn văn bản để sử dụng các công cụ xử lý</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h3><i class="fas fa-tools"></i> Sử dụng công cụ xử lý</h3>
+                            <p>Chọn văn bản và sử dụng các công cụ:</p>
+                            <ul>
+                                <li><strong><i class="fas fa-volume-up"></i> Chuyển thành âm thanh:</strong> Đọc văn bản bằng giọng nói</li>
+                                <li><strong><i class="fas fa-language"></i> Dịch văn bản:</strong> Dịch sang các ngôn ngữ khác</li>
+                                <li><strong><i class="fas fa-search"></i> Nghiên cứu:</strong> Tìm kiếm thông tin liên quan</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-number">6</div>
+                        <div class="step-content">
+                            <h3><i class="fas fa-history"></i> Quản lý lịch sử</h3>
+                            <p>Sidebar bên trái giúp bạn:</p>
+                            <ul>
+                                <li>Xem lại các công việc đã xử lý</li>
+                                <li>Click vào công việc để xem lại kết quả</li>
+                                <li>Tạo công việc mới với nút <i class="fas fa-plus"></i></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-footer">
+                    <button class="btn btn-primary" onclick="startInteractiveTour()">
+                        <i class="fas fa-play"></i> Bắt đầu hướng dẫn tương tác
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeGuideModal()">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Tour Overlay -->
+    <div id="tourOverlay" class="tour-overlay" style="display: none;"></div>
+    <div id="tourTooltip" class="tour-tooltip" style="display: none;">
+        <div class="tour-tooltip-content">
+            <div class="tour-tooltip-header">
+                <span class="tour-step-counter"></span>
+                <button class="tour-close-btn" onclick="closeTour()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="tour-tooltip-body">
+                <h4 class="tour-tooltip-title"></h4>
+                <p class="tour-tooltip-text"></p>
+            </div>
+            <div class="tour-tooltip-footer">
+                <button class="btn btn-sm btn-secondary" onclick="skipTour()">Bỏ qua</button>
+                <div class="tour-nav-buttons">
+                    <button class="btn btn-sm btn-secondary" onclick="previousTourStep()" id="tourPrevBtn" style="display: none;">
+                        <i class="fas fa-arrow-left"></i> Trước
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="nextTourStep()" id="tourNextBtn">
+                        Tiếp <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="finishTour()" id="tourFinishBtn" style="display: none;">
+                        <i class="fas fa-check"></i> Hoàn thành
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
